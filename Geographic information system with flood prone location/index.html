@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <!-- <title>GIS Flood Prone Location</title> -->
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"
+    />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+    <!-- Accurate Position Plugin -->
+    <link rel="stylesheet" href="example/style.css" />
+    <script src="../GIS/Leaflet.AccuratePosition.js"></script>
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(to left, #7cffff, #e2ffff);
+      }
+
+      header {
+        background-color: #3498db;
+        color: white;
+        text-align: center;
+        padding: 1em;
+      }
+
+      #map {
+        height: 500px;
+        margin: 1em;
+      }
+
+      h3 {
+        color: #333;
+        text-align: center;
+      }
+      form {
+        text-align: center;
+        margin: 1em;
+      }
+
+      input {
+        padding: 0.5em;
+        margin: 0.5em;
+      }
+
+      button {
+        padding: 0.5em 1em;
+        margin: 0.5em;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      class="modal fade"
+      id="myModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Notification</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            You are within the radius of Flood Prone Area!
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <h1 class="display-6 text-center mt-3" style="font-weight: bold">
+        <span style="color: rgb(0, 112, 143)">Geographic</span> Information
+        System with Flood Prone Location
+      </h1>
+
+      <!-- <div id="currentLocation">
+        <h2>Your Current Location</h2>
+        <p id="currentLocationInfo">Fetching your location...</p>
+      </div> -->
+
+      <div id="map"></div>
+
+      <div class="container mt-3">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title">Submit a Flood Prone Location</h3>
+
+            <form>
+              <div class="form-group">
+                <label for="name">Location Name:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  placeholder="Enter Location name"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="latitude">Latitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="latitude"
+                  placeholder="Enter latitude"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="longitude">Longitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="longitude"
+                  placeholder="Enter longitude"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="submitCoordinates()"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- custom location -->
+      <div class="container my-5">
+        <div class="card">
+          <div class="card-body text-center">
+            <h4 class="card-title">Set Your Location Manually</h4>
+
+            <form onsubmit="return setMyLocation()">
+              <div class="form-group">
+                <label for="mylatitude">My Latitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mylatitude"
+                  placeholder="Enter latitude"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="mylongitude">My Longitude:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mylongitude"
+                  placeholder="Enter longitude"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Set My Location
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      var map = L.map("map").setView([6.051198, 121.012249], 13);
+      var marker = L.marker([6.051198, 121.012249]).addTo(map);
+      marker.bindPopup("You are here!").openPopup();
+
+      var circle = L.circle([6.051198, 121.012249], {
+        color: "green",
+        fillColor: "#7eb600",
+        fillOpacity: 0.5,
+        radius: 100,
+      }).addTo(map);
+
+      // var markerJolo = L.marker([5.9749, 121.0335]).addTo(map);
+      // markerJolo.bindPopup("Sulu Province").openPopup();
+
+      var markerAsturias = L.marker([6.0468, 121.0012]);
+      var markerTulay = L.marker([6.0498, 120.9964]);
+      var markerTakut = L.marker([6.0522, 120.9971]);
+
+      var jolo = L.marker([6.0473, 121.0089]).bindPopup(
+          "Munincipality of Jolo"
+        ),
+        patikul = L.marker([6.0626, 121.1018]).bindPopup(
+          "Munincipality of Patikul"
+        ),
+        indanan = L.marker([5.9896, 120.954]).bindPopup(
+          "Munincipality of Indanan"
+        ),
+        maimbung = L.marker([5.9577, 121.0125]).bindPopup(
+          "Munincipality of Maimbung"
+        );
+
+      // var circleAsturias = L.circle([6.0468, 121.0012], {
+      //   color: "red",
+      //   fillColor: "#f03",
+      //   fillOpacity: 0.5,
+      //   radius: 200,
+      // }).addTo(map);
+
+      // circleAsturias.on("click", function (e) {
+      //   alert("You clicked within the circle!");
+      // });
+
+      // var circleTulay = L.circle([6.0498, 120.9964], {
+      //   color: "red",
+      //   fillColor: "#f03",
+      //   fillOpacity: 0.5,
+      //   radius: 200,
+      // }).addTo(map);
+
+      // var circleTakut = L.circle([6.0522, 120.9971], {
+      //   color: "red",
+      //   fillColor: "#f03",
+      //   fillOpacity: 0.5,
+      //   radius: 200,
+      // }).addTo(map);
+
+      // var marker = L.marker([5.9749, 121.0335]).addTo(map); sulu
+      //6.049846463525445, 120.99648069851709
+      //6.052221654689621, 120.99714968185774
+      //6.064733847535871, 121.01725821412062
+      //6.047317153403439, 121.00893793914376 Jolo
+      //6.062631922678266, 121.10185834185475 Patikul
+      //5.989669683192036, 120.95457930822958 Indanan
+      //5.957725288289863, 121.01251506646707 Maimbung
+      //5.9525159595663695, 121.10152149634791 Talipao
+      //5.958195551761149, 121.18245975833372 Panglima Isteno
+      //5.971384172320912, 121.23080394180295 old Panamao
+      //5.966260141518748, 121.31850142179465 Luuk
+      //5.882757988449631, 120.86617090402454 Parang
+      //5.90466653261737, 121.2868942987929 Kaluang
+      //6.0094891792081855, 121.37600514124672 omar
+
+      map.setView([6.051198, 121.012249], 13);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 100,
+        attribution:
+          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      //fetch
+
+      function addCircles(coordinates) {
+        coordinates.forEach(function (coord) {
+          var circle = L.circle([coord.latitude, coord.longitude], {
+            color: "red",
+            fillColor: "#f03",
+            fillOpacity: 0.5,
+            radius: 200,
+          }).addTo(map);
+        });
+      }
+
+      // Fetch coordinates from the PHP file
+      fetch("get_coordinates.php")
+        .then((response) => response.json())
+        .then((data) => {
+          // Add circles to the map based on fetched coordinates
+          addCircles(data);
+        })
+        .catch((error) => console.error("Error fetching coordinates:", error));
+
+      var popup = L.popup();
+
+      function onMapClick(e) {
+        popup
+          .setLatLng(e.latlng)
+          .setContent("You clicked the map at " + e.latlng.toString())
+          .openOn(map);
+      }
+
+      map.on("click", onMapClick);
+
+      //layer Control
+      var cities = L.layerGroup([markerAsturias, markerTulay, markerTakut]);
+      var Flood_Prone = L.layerGroup([
+        circleAsturias,
+        circleTulay,
+        circleTakut,
+      ]);
+      var munincipalities = L.layerGroup([jolo, patikul, indanan, maimbung]);
+
+      var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap",
+      });
+
+      var osmHOT = L.tileLayer(
+        "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            "© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France",
+        }
+      );
+
+      // var map = L.map("map", {
+      //   center: [5.9749, 121.0335],
+      //   zoom: 10,
+      //   layers: [osm, cities],
+      // });
+
+      var baseMaps = {
+        // OpenStreetMap: osm,
+        // "OpenStreetMap.HOT": osmHOT,
+      };
+
+      var overlayMaps = {
+        Cities: cities,
+        Flood: Flood_Prone,
+        Munincipalities: munincipalities,
+      };
+
+      var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+      var baseMaps = {
+        OpenStreetMap: osm,
+        "<span style='color: red'>OpenStreetMap.HOT</span>": osmHOT,
+      };
+      //submit
+
+      function submitCoordinates() {
+        var name = document.getElementById("name").value;
+        var latitude = document.getElementById("latitude").value;
+        var longitude = document.getElementById("longitude").value;
+
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "submit_coordinates.php", true);
+          xhr.setRequestHeader(
+            "Content-type",
+            "application/x-www-form-urlencoded"
+          );
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              console.log(xhr.responseText);
+              // Reset input values after successful submission
+              document.getElementById("name").value = "";
+              document.getElementById("latitude").value = "";
+              document.getElementById("longitude").value = "";
+            }
+          };
+          xhr.send(
+            "name=" + name + "&latitude=" + latitude + "&longitude=" + longitude
+          );
+        } else {
+          alert("Please enter valid coordinates!");
+        }
+      }
+
+      //location tracker
+
+      function onAccuratePositionError(e) {
+        addStatus(e.message, "error");
+      }
+
+      function onAccuratePositionProgress(e) {
+        var message = "Progressing … (Accuracy: " + e.accuracy + ")";
+        addStatus(message, "progressing");
+      }
+
+      function onAccuratePositionFound(e) {
+        var message =
+          "Most accurate position found (Accuracy: " + e.accuracy + ")";
+        addStatus(message, "done");
+        map.setView(e.latlng, 12);
+        L.marker(e.latlng).addTo(map);
+      }
+
+      function addStatus(message, className) {
+        var ul = document.getElementById("status"),
+          li = document.createElement("li");
+        li.appendChild(document.createTextNode(message));
+        ul.className = className;
+        ul.appendChild(li);
+      }
+
+      map.on("accuratepositionprogress", onAccuratePositionProgress);
+      map.on("accuratepositionfound", onAccuratePositionFound);
+      map.on("accuratepositionerror", onAccuratePositionError);
+
+      map.findAccuratePosition({
+        maxWait: 10000,
+        desiredAccuracy: 20,
+      });
+
+      //custom location
+      function setMyLocation() {
+        // Get latitude and longitude from input fields
+        var myLatitude = document.getElementById("mylatitude").value;
+        var myLongitude = document.getElementById("mylongitude").value;
+
+        // Validate input
+        if (myLatitude === "" || myLongitude === "") {
+          alert("Please enter both latitude and longitude.");
+          return;
+        }
+
+        // Parse latitude and longitude to float
+        var lat = parseFloat(myLatitude);
+        var lng = parseFloat(myLongitude);
+
+        // Check if the input is valid numeric values
+        // if (isNaN(lat) || isNaN(lng)) {
+        //   alert("Invalid latitude or longitude. Please enter numeric values.");
+        //   return;
+        // }
+
+        if (
+          myLatitude === "" ||
+          myLongitude === "" ||
+          isNaN(lat) ||
+          isNaN(lng)
+        ) {
+          alert(
+            "Invalid input. Please enter both latitude and longitude as numeric values."
+          );
+          return false;
+        }
+
+        // Add marker to the map
+        var marker = L.marker([lat, lng]).addTo(map);
+
+        // var distance = map.distance([lat, lng], circleAsturias.getLatLng());
+        // if (distance <= circleAsturias.getRadius()) {
+        //   alert("You are within the radius!");
+        // } else {
+        //   alert("You are outside the radius.");
+        // }
+
+        //fetch
+
+        // Fetch the circle radius from the server
+        fetch("getCircleRadius.php?latitude=" + lat + "&longitude=" + lng)
+          .then((response) => response.json())
+          .then((data) => {
+            // Assuming the server returns an object with the radius property
+            var circleRadius = data.radius;
+
+            // Add marker to the map
+            var marker = L.marker([lat, lng]).addTo(map);
+
+            // Check if the location is within the fetched radius
+            var distance = map.distance([lat, lng], marker.getLatLng());
+            if (distance <= circleRadius) {
+              alert("You are within the radius of Flood Prone Area!");
+              // $("#myModal").modal("show");
+            } else {
+              alert("You are outside the radius.");
+            }
+
+            // Bind popup with additional information if needed
+            marker
+              .bindPopup(
+                "Your Location is withen the Raduis of Flood Prone Area : " +
+                  lat +
+                  ", " +
+                  lng
+              )
+              .openPopup();
+
+            // Reset the form
+            document.getElementById("mylatitude").value = "";
+            document.getElementById("mylongitude").value = "";
+          })
+          .catch((error) => console.error("Error:", error));
+
+        // Prevent form submission
+        return false;
+
+        //         var distanceAsturias = map.distance(e.latlng, circleAsturias.getLatLng());
+        // var distanceTulay = map.distance(e.latlng, circleTulay.getLatLng());
+        // var distanceTakut = map.distance(e.latlng, circleTakut.getLatLng());
+
+        // if (distanceAsturias <= circleAsturias.getRadius() ||
+        //     distanceTulay <= circleTulay.getRadius() ||
+        //     distanceTakut <= circleTakut.getRadius()) {
+        //     alert("You are within the radius of at least one circle!");
+        // } else {
+        //     alert("You are outside the radius of all circles.");
+        // }
+
+        // You can also open a popup with additional information if needed
+        marker.bindPopup("My Location: " + lat + ", " + lng).openPopup();
+
+        // Reset the form
+        document.getElementById("mylatitude").value = "";
+        document.getElementById("mylongitude").value = "";
+
+        // Allow form submission
+        return true;
+      }
+
+      //current loc
+      document.addEventListener("DOMContentLoaded", function () {
+        // Your existing code...
+
+        // Fetch and display current location
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+          showError({
+            message: "Geolocation is not supported by your browser.",
+          });
+        }
+      });
+
+      function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Display the location on the HTML page
+        const locationElement = document.getElementById("location");
+        locationElement.innerHTML = `Your current position is:<br>Latitude: ${latitude}<br>Longitude: ${longitude}`;
+
+        // Additional code to display the current location on the map
+        const currentLocationInfoElement = document.getElementById(
+          "currentLocationInfo"
+        );
+        currentLocationInfoElement.innerHTML = `Latitude: ${latitude}<br>Longitude: ${longitude}`;
+
+        // Add a marker for the current location on the map
+        L.marker([latitude, longitude]).addTo(map);
+      }
+
+      function showError(error) {
+        // Your existing error handling code...
+      }
+    </script>
+  </body>
+
+  <!-- <script src="my_loc.js"></script> -->
+</html>

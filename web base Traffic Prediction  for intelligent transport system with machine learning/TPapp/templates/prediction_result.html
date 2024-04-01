@@ -1,0 +1,93 @@
+{% if prediction %}
+
+<div class="input-data-display card">
+  <!-- <p>Year: {{ request.form['Year'] }}</p>
+  <p>
+    Month: {% set month_dict = {1: 'January', 2: 'February', 3: 'March', 4:
+    'April'} %} {{ month_dict[request.form['Month']|int] }}
+  </p>
+  <p>Date: {{ request.form['Date_no'] }}</p>
+  <p>Time: {{ request.form['Hour'] }} {{ request.form['ampm'] }}</p> -->
+  <table>
+    <tr>
+      <td>Year:</td>
+      <td>{{ request.form['Year'] }}</td>
+    </tr>
+    <tr>
+      <td>Month:</td>
+      <td>
+        {% set month_dict = {1: 'January', 2: 'February', 3: 'March', 4:
+        'April'} %} {{ month_dict[request.form['Month']|int] }}
+      </td>
+    </tr>
+    <tr>
+      <td>Date:</td>
+      <td>{{ request.form['Date_no'] }}</td>
+    </tr>
+    <tr>
+      <td>Time:</td>
+      <td>{{ request.form['Hour'] }} {{ request.form['ampm'] }}</td>
+    </tr>
+  </table>
+  <p>{{ request.form['Area'] }}</p>
+
+  {% if request.form['Area'] == 'Area 1: Crossing town Jolo' %}
+  <img
+    src="static/junc.jpg"
+    alt="Area 1 Image"
+    style="height: 250px; width: 370px; margin: 0 15px"
+  />
+  {% elif request.form['Area'] == 'Area 2: Crossing Indanan' %}
+  <img
+    src="static/com.jpg"
+    alt="Area 2 Image"
+    style="height: 250px; width: 370px; margin: 0 15px"
+  />
+  {% elif request.form['Area'] == 'Area 3: Crossing Marteriz' %}
+  <img
+    src="static/mar.jpg"
+    alt="Area 3 Image"
+    style="height: 250px; width: 370px; margin: 0 15px"
+  />
+  {% endif %}
+</div>
+
+<div class="prediction-container">
+  <div class="prediction-label">Prediction for {{ selected_area }}:</div>
+
+  {% set input_hour = request.form['Hour'] | float %} {% set time_A =
+  request.form['ampm'] %} {% if input_hour != 0 %}
+  <!-- {% set final_prediction = (((prediction / input_hour) / 2) / 2 ) | float %}  -->
+
+  {% set initial_prediction = ((prediction / input_hour) / 3) | float %} {%set
+  time_input = request.form['Hour'] | float %} {% if time_input >= 7 and
+  time_input <= 8 and time_A == "AM" %} {%set final_prediction =
+  initial_prediction * 3 %} {% elif time_input >= 1 and time_input <= 2 and
+  time_A == "PM" %} {%set final_prediction = (initial_prediction / 2) %} {% elif
+  time_input >= 4 and time_input <= 5 and time_A == "PM" %} {%set
+  final_prediction = initial_prediction * 2 %} {% else %} {% set
+  final_prediction = initial_prediction %} {% endif %} {%set
+  final_prediction_moved = final_prediction / 100 %}
+
+  <h2>{{ "%0.8f"|format(final_prediction_moved) }}</h2>
+
+  {% if '.' in final_prediction_moved|string %}
+  <p>
+    It means, the number of cars in the area is {{
+    "%0.2f"|format(final_prediction_moved) }}
+  </p>
+
+  {% if final_prediction_moved < 5 %}
+  <p>Identification: 1 = Less than 5 cars (No Traffic)</p>
+  {% elif 5 <= final_prediction_moved < 15 %}
+  <p>Identification: 2 = 5 to 15 cars (Moderate Traffic)</p>
+  {% elif 15 <= final_prediction_moved < 30 %}
+  <p>Identification: 3 = 15 to 30 cars (Moderate Traffic)</p>
+  {% elif 30 <= final_prediction_moved < 50 %}
+  <p>Identification: 4 = 30 to 50 cars (Heavy Traffic)</p>
+  {% else %}
+  <p>Identification: 5 = More than 50 cars (Very Heavy Traffic)</p>
+  {% endif %} {% endif %} {% else %}
+  <div class="error-message">Error: Division by zero</div>
+  {% endif %} {% endif %}
+</div>

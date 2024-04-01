@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>User</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #3498db;
+        color: white;
+        text-align: center;
+        padding: 1em;
+      }
+
+      #map {
+        height: 500px;
+        margin: 1em;
+      }
+
+      h3 {
+        color: #333;
+        text-align: center;
+      }
+      form {
+        text-align: center;
+        margin: 1em;
+      }
+
+      input {
+        padding: 0.5em;
+        margin: 0.5em;
+      }
+
+      button {
+        padding: 0.5em 1em;
+        margin: 0.5em;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Geographic information system with flood prone location</h3>
+    <div id="map"></div>
+
+    <form>
+      Latitude:
+      <input type="text" id="latitude" placeholder="Enter latitude" /><br />
+      Longitude:
+      <input type="text" id="longitude" placeholder="Enter longitude" /><br />
+      <button type="button" onclick="submitCoordinates()">Submit</button>
+      <button type="button" onclick="showFloodProneAreas()">
+        Flood Prone Areas
+      </button>
+    </form>
+  </body>
+  <script>
+    var map = L.map("map").setView([5.9749, 121.0335], 13);
+
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    //locate
+
+    navigator.geolocation.watchPosition(success, error);
+
+    function success(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const accuracy = pos.coords.accuracy;
+
+      L.marker([lat, lng]).addTo(map);
+      L.circle([lat, lng], { radius: accuracy }).addTo(map);
+    }
+
+    function error(err) {
+      if (err.code === 1) {
+        alert("Please allow geolocation access");
+      } else {
+        alert("Cannot get current location");
+      }
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        console.log(position);
+      });
+    }
+
+    // map.locate({ setView: true, maxZoom: 16 });
+
+    // function onLocationFound(e) {
+    //   var radius = e.accuracy;
+
+    //   L.marker(e.latlng)
+    //     .addTo(map)
+    //     .bindPopup("You are within " + radius + " meters from this point")
+    //     .openPopup();
+
+    //   L.circle(e.latlng, radius).addTo(map);
+    // }
+
+    // map.on("locationfound", onLocationFound);
+
+    // function onLocationError(e) {
+    //   alert(e.message);
+    // }
+
+    // map.on("locationerror", onLocationError);
+
+    //fetch
+
+    function showFloodProneAreas() {
+      // Fetch coordinates from the PHP file
+      fetch("get_coordinates.php")
+        .then((response) => response.json())
+        .then((data) => {
+          // Add circles to the map based on fetched coordinates
+          addCircles(data);
+        })
+        .catch((error) => console.error("Error fetching coordinates:", error));
+    }
+
+    function addCircles(coordinates) {
+      coordinates.forEach(function (coord) {
+        var circle = L.circle([coord.latitude, coord.longitude], {
+          color: "red",
+          fillColor: "#f03",
+          fillOpacity: 0.5,
+          radius: 200,
+        }).addTo(map);
+      });
+    }
+  </script>
+</html>

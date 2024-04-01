@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Web-based Traffic Prediction</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(to right, #3498db, #2c3e50);
+        color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      form {
+        max-width: 400px;
+        margin: 20px auto;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      h2,
+      p {
+        text-align: center;
+        color: #333;
+      }
+      .prediction-container {
+        /* margin-top: 20px; */
+        max-width: 400px;
+        margin: 20px auto;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .card {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        max-width: 400px;
+        margin: 20px auto;
+        text-align: right; /* Align text to the right */
+      }
+
+      .card p {
+        font-weight: bold; /* Make text bold */
+        margin-bottom: 10px; /* Add margin between paragraphs */
+      }
+
+      .prediction-label {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .legend-container {
+        margin-top: 20px;
+      }
+
+      .legend-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: auto;
+      }
+
+      th,
+      td {
+        border: 1px solid #000000;
+        color: #000000;
+        text-align: left;
+        padding: 8px;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Web Base Traffic Prediction for Intelligent Transport System</h1>
+    <h1>with Machine Learning</h1>
+
+    <form method="post" action="/predict" id="predictionForm">
+      <input
+        type="text"
+        name="Year"
+        placeholder="Year"
+        value="2024"
+        required
+        readonly
+      />
+      <select name="Month" required>
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+      </select>
+      <input type="text" name="Date_no" placeholder="Date" required />
+
+      <div style="display: flex; gap: 10px">
+        <div>
+          <input
+            type="text"
+            id="hourTextBox"
+            name="Hour"
+            placeholder="Time"
+            required
+            style="width: 325px"
+          />
+        </div>
+
+        <div>
+          <select id="ampmSelect" name="ampm">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+      </div>
+
+      <select name="Area" required>
+        <option value="Area 1: Crossing town Jolo">
+          Area 1: Crossing town Jolo
+        </option>
+        <option value="Area 2: Crossing Indanan">
+          Area 2: Crossing Indanan
+        </option>
+        <option value="Area 3: Crossing Marteriz">
+          Area 3: Crossing Marteriz
+        </option>
+      </select>
+
+      <button type="">Predict</button>
+    </form>
+
+    {% include 'prediction_result.html' %}
+  </body>
+</html>
